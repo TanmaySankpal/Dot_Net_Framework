@@ -1,0 +1,46 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Independentsoft.Graph;
+using Independentsoft.Graph.Mails;
+using Independentsoft.Graph.Users;
+using Independentsoft.Graph.QueryOptions;
+
+namespace ConsoleApp1
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            try
+            {
+                GraphClient client = new GraphClient();
+
+                // Set the authentication credentials
+                client.ClientId = "63333333-209e-454e-b7bd-55a4d201270f";
+                client.Tenant = "independentsoft.onmicrosoft.com";
+                client.ClientSecret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+                Query query = new Query();
+                query.Top = 999;
+
+                // Retrieve all messages from the Inbox folder of the specified mailbox
+                IList<Message> messages = await client.GetMessages(StandardMailboxFolder.Inbox, new UserId("info@independentsoft.onmicrosoft.com"), query);
+
+                // Download each message as a .msg file and save it to a local directory
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Independentsoft.Msg.Message msgFile = await client.GetMessageFile(messages[i].Id, new UserId("info@independentsoft.onmicrosoft.com"));
+
+                    msgFile.Save("e:\\test\\" + i + ".msg", true);
+                }
+            }
+            catch (GraphException ex)
+            {
+                Console.WriteLine("Error: " + ex.Code);
+                Console.WriteLine("Message: " + ex.Message);
+                Console.Read();
+            }
+        }
+    }
+}
